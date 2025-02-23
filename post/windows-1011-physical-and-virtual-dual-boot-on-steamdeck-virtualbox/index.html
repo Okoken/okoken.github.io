@@ -1,0 +1,332 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Windows 10/11 physical &amp; virtual dual boot on Steamdeck (Virtualbox) | Okoken&#39;s notes</title>
+<link rel="shortcut icon" href="https://okoken.github.io//favicon.ico?v=1740312902543">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+<link rel="stylesheet" href="https://okoken.github.io//styles/main.css">
+<link rel="alternate" type="application/atom+xml" title="Windows 10/11 physical &amp; virtual dual boot on Steamdeck (Virtualbox) | Okoken&#39;s notes - Atom Feed" href="https://okoken.github.io//atom.xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+
+    <meta name="description" content="Recently upgraded the SSD to 512GB and remade the SteamOS. With such clean system, started to re-investigate the Windows..." />
+    <meta name="keywords" content="Steamdeck,VM" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+    <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://okoken.github.io/">
+  <img class="avatar" src="https://okoken.github.io//images/avatar.png?v=1740312902543" alt="">
+  </a>
+  <h1 class="site-title">
+    Okoken&#39;s notes
+  </h1>
+  <p class="site-description">
+    This is the first time I use Gitalk. If you could not leave a comment, please let me know by directly submitting an issue.
+https://github.com/Okoken/okoken.github.io/issues
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          Home
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          Archives
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          Tags
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          About
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+        <a href="https://github.com/Okoken" target="_blank">
+          <i class="ri-github-line"></i>
+        </a>
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              Windows 10/11 physical &amp; virtual dual boot on Steamdeck (Virtualbox)
+            </h2>
+            <div class="post-info">
+              <span>
+                2023-05-15
+              </span>
+              <span>
+                7 min read
+              </span>
+              
+                <a href="https://okoken.github.io/tag/DkXs4mGkk/" class="post-tag">
+                  # Steamdeck
+                </a>
+              
+                <a href="https://okoken.github.io/tag/ifViB-vYN/" class="post-tag">
+                  # VM
+                </a>
+              
+            </div>
+            
+            <div class="post-content-wrapper">
+              <div class="post-content" v-pre>
+                <p>Recently upgraded the SSD to 512GB and remade the SteamOS. With such clean system, started to re-investigate the Windows physical &amp; virtual dual boot to get rid of the cons of the KVM method (Link: https://okoken.github.io/post/windows-1011-physical-and-virtual-dual-boot-on-steamdeck/).</p>
+<p>To simply conclude, this method meets all my needs and already used in my daily life.</p>
+<p><strong>🔨&lt;2nd trial with Virtualbox&gt;</strong><br>
+Inspiring by @Lampa183, found the way to install Virtualbox in SteamOS easily.<br>
+https://www.reddit.com/r/SteamDeck/comments/y4n7k6/macos_catalina_on_steam_deck_steamos_virtualbox/</p>
+<p>💡 Pros:<br>
+- no USB SD card reader required anymore<br>
+- out-of-the-box features provided by Virtualbox, e.g. shared folder<br>
+<strong>💡 Cons:</strong><br>
+- need to run script to reinstall it after every SteamOS update</p>
+<p><strong>💡 Requirements:</strong></p>
+<ul>
+<li>SD card</li>
+</ul>
+<p><strong>💡 Major steps:</strong></p>
+<ol>
+<li>
+<p>Prepare Windows-To-Go in VHD format. I am using MBR option, but believe GPT options works the same (and even better).</p>
+<blockquote>
+<p>hints: Rufus is not supporting WTG in VHD. Here is a Chinese tool with English support.<br>
+Home site:  https://bbs.luobotou.org/thread-761-1-1.html<br>
+Download link: https://dl.luobotou.org/wtga5610.zip</p>
+</blockquote>
+</li>
+<li>
+<p>To install Virtualbox <em>(will not survice after SteamOS update)</em><br>
+2a. Install packages [linux-neptune-headers virtualbox-host-dkms virtualbox] via pacman.</p>
+<blockquote>
+<p>hints: Instructions for Steamdeck pacman can be easily found if you search. Just be careful to use &quot;pacman <strong>-Sy</strong> [package1 package2 ...]&quot; as per @Philipp Richter, Steam Deck Tricks (https://gitlab.com/popsulfr/steam-deck-tricks).<br>
+2b. Configure Virtualbox following Archlinux wiki (https://wiki.archlinux.org/title/VirtualBox), and reboot.<br>
+hints: minimum commands as below.</p>
+</blockquote>
+<pre><code>modprobe vboxdrv
+gpasswd -a deck vboxusers
+</code></pre>
+</li>
+<li>
+<p>To make the VHD bootable, inspired by @pbatard / uefi-ntfs (https://github.com/pbatard/uefi-ntfs)<br>
+3a. To mount VHD in another Windows. You can choose to mount in another PC or in a another VM.<br>
+3b. Create a new partition at the end of the VHD with any disk manager e.g. DiskGenius. Format and size should be the same as the EFI partition in the SD card.<br>
+3c. Copy all the contents from the SD card EFI partition to the new VHD partition you just created.<br>
+3d. BOOTICE to load EFI/Microsoft/Boot/BCD in the new partition, and change the boot path from VHD to the 1st partion in the VHD.<br>
+<em>I don't have screenshots, but this step is tricky so borrowed some screenshot from somewhere else. Only below parts in the red circles need to be changed.</em><br>
+<Before><br>
+<img src="https://okoken.github.io//post-images/1684058151770.jpg" alt="" loading="lazy"><br>
+<After><br>
+<img src="https://okoken.github.io//post-images/1684058165501.png" alt="" loading="lazy"></p>
+</li>
+<li>
+<p>Create new VM in Virtualbox with the VHD, and with &quot;Enable EFI&quot; option checked in the Settings-&gt;System.</p>
+<blockquote>
+<p>Now the Windows should be bootable via Virtualbox and physically.<br>
+<em>Remember to backup your VHD regullarly, as you know some SD has bad performance and can easily corrupt.</em></p>
+</blockquote>
+</li>
+</ol>
+<p><strong>💡 Optional steps and tips</strong></p>
+<ol>
+<li>For easy backup, mostly we keep the VHD as small as possible, e.g. around 64GB with dynamic size. Therefore when we boot the Windows physically, typically we will have the VHD mount as C:\ and the real SD card as D:.<br>
+In this case it is a good idea to always install applications in D:, and to reallocate some folders (Desktop, Downloads, Documents, etc.) to the D:. There are many instrutions and below is one:
+<blockquote>
+<p>https://www.partitionwizard.com/clone-disk/win10-move-user-folder-to-another-drive.html</p>
+</blockquote>
+</li>
+</ol>
+<p>But it is quite a headache to let the Windows still access the D:\ when boot via Virtualbox. Below is the method.<br>
+1a. Add the whole SD card as &quot;Shared Folder&quot; in VM settings, with Full access, Auto Mount, and assign a Mount Point e.g. Z:\.<br>
+1b. Create a new virtual hard disk for Windows VM, and boot up the Windows VM to create partition on it. Assign it as D:\.<br>
+1c. Use mkdir command to create hard link from Z:\ to D:\. <em>Without this hardlink you will not be able to run .exe requiring Admin permission. Inspired by @Casey Dwayne,</em></p>
+<blockquote>
+<p>https://forums.virtualbox.org/viewtopic.php?t=80854#:~:text=mklink%20%2Fd%20TempDir,To%5CDesired%20Folder%22</p>
+</blockquote>
+<ol start="2">
+<li>
+<p>!!! The mouse driver in the Virtualbox Guest Additions will crash Windows. If you use Virtualbox Guest Additions, follow below steps to uninstall the mouse driver inside.<br>
+2a. Use command line to direct the path to the Virtualbox Guest Additions CD. Run</p>
+<pre><code> .\VBoxWindowsAdditions.exe /extract /D=path_to_some_where
+</code></pre>
+<p>2b. Direct to the <em>path_to_some_where</em> you extracted the files. Run</p>
+<pre><code> .\VBoxDrvInst.exe driver uninstall .\VBoxMouse.inf
+</code></pre>
+</li>
+<li>
+<p>To automount the SD card NTFS partition at SteamOS bootup. Below are the instructions I used @Chinballs Gaming.</p>
+<blockquote>
+<p>https://www.youtube.com/watch?v=Z6dhdlqtPS4<br>
+https://www.youtube.com/watch?v=elusccCzvOc (in case you made anything wrong and cannot boot your SteamOS)</p>
+</blockquote>
+</li>
+<li>
+<p>For USB3.0 the Virtualbox Extension Pack is required. Below are the commands to install it easily. <em>(will not survice after SteamOS update)</em></p>
+<pre><code>echo &quot;Downloading Virtualbox Extension Pack&quot;
+curl https://download.virtualbox.org/virtualbox/$(vboxmanage -v | cut -dr -f1)/Oracle_VM_VirtualBox_Extension_Pack-$(vboxmanage -v | cut -dr -f1).vbox-extpack -o Oracle_VM_VirtualBox_Extension_Pack.vbox-extpack
+
+echo &quot;Installing Virtualbox Extension Pack&quot;
+echo y | VBoxManage extpack install --replace ./Oracle_VM_VirtualBox_Extension_Pack.vbox-extpack
+</code></pre>
+</li>
+<li>
+<p>For all the steps which will not survive after SteamOS update, good to put every commands in shell bash so that you can run them easily after every SteamOS. One example by @muzzol/SD_packages-pacman.sh:</p>
+<blockquote>
+<p>https://gist.github.com/muzzol/9f559c92a7f1132fcd65b211a86759b2</p>
+</blockquote>
+</li>
+<li>
+<p>Timezone is another issue between SteamOS and Windows. Here is a method to fix it from @HoodedHorse.</p>
+<blockquote>
+<p>https://www.reddit.com/r/SteamDeck/comments/uxnukk/problem_with_dualbooting_windows_and_time_zones/#:~:text=open%20up%20a,t%20REG_DWORD%20%2Ff</p>
+</blockquote>
+</li>
+<li>
+<p>It is annoying that the EFI partitions are visible in Windows or SteamOS. DISKPART command under Windows can remove the volumn lable to avoid showing it in Windows, and &quot;set id=EF&quot; can avoid showing it in SteamOS, inspired by @Ahze85283:</p>
+<blockquote>
+<p>https://superuser.com/questions/459434/how-to-make-a-hidden-partition-visible</p>
+</blockquote>
+</li>
+<li>
+<p>It would be great if I can use my bluetooth mouse / keyboard in both the SteamOS and the physical Windows without reconnection. @Mario Olivio Flores provided the method with <em>psexec</em>.</p>
+<blockquote>
+<p>https://unix.stackexchange.com/questions/255509/bluetooth-pairing-on-dual-boot-of-windows-linux-mint-ubuntu-stop-having-to-p#:~:text=You%20need%20psexec,show%20this%20values</p>
+</blockquote>
+</li>
+<li>
+<p>In case you want better network adapter performance in the Windows VM e.g. for NAS access, it would be worthy to install the virtIO driver for the virtio-net (Virtualbox VM -&gt; Settings -&gt; Network -&gt; Adapter1 -&gt; Advanced -&gt; Adapter Type). Driver is here:</p>
+<blockquote>
+<p>https://docs.fedoraproject.org/en-US/quick-docs/creating-windows-virtual-machines-using-virtio-drivers/</p>
+</blockquote>
+</li>
+</ol>
+
+              </div>
+              <div class="toc-container">
+                
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://okoken.github.io/post/to-use-logicool-k480-for-steamdeck/">
+              <h3 class="post-title">
+                To use Logicool K480 for Steamdeck
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '68cbd78a5b757a75c28d',
+    clientSecret: '489acffa05747421daf54b7ce1114f93c12827a2',
+    repo: 'okoken.github.io',
+    owner: 'Okoken',
+    admin: ['Okoken'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+  <a class="rss" href="https://okoken.github.io//atom.xml" target="_blank">
+    <i class="ri-rss-line"></i> RSS
+  </a>
+</div>
+
+      </div>
+    </div>
+
+    <script>
+      hljs.initHighlightingOnLoad()
+
+      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+      // This should probably be throttled.
+      // Especially because it triggers during smooth scrolling.
+      // https://lodash.com/docs/4.17.10#throttle
+      // You could do like...
+      // window.addEventListener("scroll", () => {
+      //    _.throttle(doThatStuff, 100);
+      // });
+      // Only not doing it here to keep this Pen dependency-free.
+
+      window.addEventListener("scroll", event => {
+        let fromTop = window.scrollY;
+
+        mainNavLinks.forEach((link, index) => {
+          let section = document.getElementById(decodeURI(link.hash).substring(1));
+          let nextSection = null
+          if (mainNavLinks[index + 1]) {
+            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+          }
+          if (section.offsetTop <= fromTop) {
+            if (nextSection) {
+              if (nextSection.offsetTop > fromTop) {
+                link.classList.add("current");
+              } else {
+                link.classList.remove("current");    
+              }
+            } else {
+              link.classList.add("current");
+            }
+          } else {
+            link.classList.remove("current");
+          }
+        });
+      });
+
+    </script>
+  </body>
+</html>

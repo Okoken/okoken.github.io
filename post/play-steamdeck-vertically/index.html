@@ -1,0 +1,300 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Play Steamdeck vertically | Okoken&#39;s notes</title>
+<link rel="shortcut icon" href="https://okoken.github.io//favicon.ico?v=1740312902543">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+<link rel="stylesheet" href="https://okoken.github.io//styles/main.css">
+<link rel="alternate" type="application/atom+xml" title="Play Steamdeck vertically | Okoken&#39;s notes - Atom Feed" href="https://okoken.github.io//atom.xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+
+    <meta name="description" content="Here is the method I play the Steam Deck vertically with JoyCons, mostly for emulators but also mostly work for other ga..." />
+    <meta name="keywords" content="Steamdeck" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+    <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://okoken.github.io/">
+  <img class="avatar" src="https://okoken.github.io//images/avatar.png?v=1740312902543" alt="">
+  </a>
+  <h1 class="site-title">
+    Okoken&#39;s notes
+  </h1>
+  <p class="site-description">
+    This is the first time I use Gitalk. If you could not leave a comment, please let me know by directly submitting an issue.
+https://github.com/Okoken/okoken.github.io/issues
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          Home
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          Archives
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          Tags
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          About
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+        <a href="https://github.com/Okoken" target="_blank">
+          <i class="ri-github-line"></i>
+        </a>
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              Play Steamdeck vertically
+            </h2>
+            <div class="post-info">
+              <span>
+                2024-05-12
+              </span>
+              <span>
+                4 min read
+              </span>
+              
+                <a href="https://okoken.github.io/tag/DkXs4mGkk/" class="post-tag">
+                  # Steamdeck
+                </a>
+              
+            </div>
+            
+            <div class="post-content-wrapper">
+              <div class="post-content" v-pre>
+                <p>Here is the method I play the Steam Deck vertically with JoyCons, mostly for emulators but also mostly work for other games.<br>
+<img src="https://okoken.github.io//post-images/1715433415119.jpg" alt="" loading="lazy"></p>
+<h1 id="1-hw-part">1. HW part</h1>
+<p><strong>Updates on 2/23/2025: also created a 3D printable grip model. Refer to below link.<br>
+https://makerworld.com/zh/models/1140868#profileId-1143225</strong></p>
+<!-- more -->
+<hr>
+<p>The key accessary is the 3D printed part for Joycon attachment, which I bought it from Taoabo (China ver. Aliexpress).<br>
+https://item.taobao.com/item.htm?abbucket=14&amp;id=706851826742&amp;ns=1&amp;priceTId=214780e317154338077877668e1449&amp;spm=a21n57.1.item.9.4635523cCWRzUt<br>
+<img src="https://okoken.github.io//post-images/1715433925667.png" alt="" loading="lazy"></p>
+<p>We also need a stand to &quot;hook&quot; the Joycons finally to the Steamdeck, which I happened to have one disparted from the &quot;Back Cover Protective Case&quot; I bough previous (what I need was just the cover lol).<br>
+<img src="https://okoken.github.io//post-images/1715434112761.png" alt="" loading="lazy"></p>
+<p>At the end the combined accessory together with the Joycons looks like this.<br>
+<img src="https://okoken.github.io//post-images/1715434293569.jpg" alt="" loading="lazy"></p>
+<h1 id="2-sw-part">2. SW part</h1>
+<p>Well once we complete the HW part it is really OK to go, but just very inconvenient due to several reasons:</p>
+<ul>
+<li>Joycons need to be paired after every restart (Linux or Joycon limitation?)</li>
+<li>Steamdeck controllers buttons may be unexpectedly pushed, affecting the game play</li>
+<li>Too many steps to rotate the screen</li>
+<li>Not all the game can start properly with vertical resolution</li>
+</ul>
+<p>To make our live easier, surely we can make some bash script to automate the jobs, and below are some key commands to be used.<br>
+Surely first go inside Desktop Mode.</p>
+<p><em><strong>Joycon Autoconnection</strong></em></p>
+<pre><code>#!/bin/bash
+
+# Replace below MAC with those of your Joycon L and Joycon R !!
+bluetoothctl -- remove DC:68:EB:54:41:D6
+bluetoothctl -- remove DC:68:EB:54:37:10
+
+while true
+do
+    bluetoothctl --timeout 3 scan on
+
+    # Replace below MAC with those of your Joycon L!!
+    bluetoothctl -- connect DC:68:EB:54:41:D6
+    retValL=$?
+
+    # Replace below MAC with those of your Joycon R !!
+    bluetoothctl -- connect DC:68:EB:54:37:10
+    retValR=$?
+    if [ $retValL -ne 0 ] || [ $retValR -ne 0 ]; then
+        echo &quot;Error&quot;
+    else
+        break
+    fi
+done
+</code></pre>
+<p><em><strong>Steamdeck Controller Disable</strong></em></p>
+<pre><code>#!/bin/bash
+# Replace below 12345678 with your user password !!
+echo 12345678 | sudo -S sh -c &quot;echo '3-3:1.0' &gt; /sys/bus/usb/drivers/usbhid/unbind&quot;
+echo 12345678 | sudo -S sh -c &quot;echo '3-3:1.1' &gt; /sys/bus/usb/drivers/usbhid/unbind&quot;
+echo 12345678 | sudo -S sh -c &quot;echo '3-3:1.2' &gt; /sys/bus/usb/drivers/usbhid/unbind&quot;
+</code></pre>
+<p><em><strong>Steamdeck Controller Enable</strong></em></p>
+<pre><code>#!/bin/bash
+# Replace below 12345678 with your user password !!
+echo 12345678 | sudo -S sh -c &quot;echo '3-3:1.0' &gt; /sys/bus/usb/drivers/usbhid/bind&quot;
+echo 12345678 | sudo -S sh -c &quot;echo '3-3:1.1' &gt; /sys/bus/usb/drivers/usbhid/bind&quot;
+echo 12345678 | sudo -S sh -c &quot;echo '3-3:1.2' &gt; /sys/bus/usb/drivers/usbhid/bind&quot;
+</code></pre>
+<p><em><strong>Steamdeck Screen Vertical</strong></em></p>
+<pre><code>#!/bin/bash
+xrandr --output eDP --mode 800x1280 --pos 0x0 --rotate inverted
+# Steamdeck Screen Horizontal
+#!/bin/bash
+xrandr --output eDP --mode 800x1280 --pos 0x0 --rotate right
+</code></pre>
+<p><em><strong>Run game properly in Vertical mode</strong></em><br>
+For emulators this step can be skipped, but for Windows games, many of them cannot be started in vertical resolution.<br>
+Tested Gamescope but it is not always working, so turn around to use KWin/Wayland.</p>
+<pre><code>#!/bin/bash
+export $(dbus-launch)
+kwin_wayland --xwayland --width 1280 --height 800 --scale 0.625 &amp;
+</code></pre>
+<p>Then we can restart Steam in Big picture mode with below script.</p>
+<pre><code>#!/bin/bash
+killall steam
+sleep 5
+ps cax | grep steam
+retval=$?t
+
+while 1
+do
+    if [ $retval -eq 0 ]
+    then
+        echo &quot;Steam still alive.&quot;
+    else
+        break
+    fi
+done
+
+sleep 5
+DISPLAY=:1 steam -bigpicture
+</code></pre>
+
+              </div>
+              <div class="toc-container">
+                <ul class="markdownIt-TOC">
+<li><a href="#1-hw-part">1. HW part</a></li>
+<li><a href="#2-sw-part">2. SW part</a></li>
+</ul>
+
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://okoken.github.io/post/to-enable-wifi-hotspot-in-steamdeck-for-steamlink-etc/">
+              <h3 class="post-title">
+                To enable WIFI hotspot in Steamdeck for Steamlink, etc.
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '68cbd78a5b757a75c28d',
+    clientSecret: '489acffa05747421daf54b7ce1114f93c12827a2',
+    repo: 'okoken.github.io',
+    owner: 'Okoken',
+    admin: ['Okoken'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+  <a class="rss" href="https://okoken.github.io//atom.xml" target="_blank">
+    <i class="ri-rss-line"></i> RSS
+  </a>
+</div>
+
+      </div>
+    </div>
+
+    <script>
+      hljs.initHighlightingOnLoad()
+
+      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+      // This should probably be throttled.
+      // Especially because it triggers during smooth scrolling.
+      // https://lodash.com/docs/4.17.10#throttle
+      // You could do like...
+      // window.addEventListener("scroll", () => {
+      //    _.throttle(doThatStuff, 100);
+      // });
+      // Only not doing it here to keep this Pen dependency-free.
+
+      window.addEventListener("scroll", event => {
+        let fromTop = window.scrollY;
+
+        mainNavLinks.forEach((link, index) => {
+          let section = document.getElementById(decodeURI(link.hash).substring(1));
+          let nextSection = null
+          if (mainNavLinks[index + 1]) {
+            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+          }
+          if (section.offsetTop <= fromTop) {
+            if (nextSection) {
+              if (nextSection.offsetTop > fromTop) {
+                link.classList.add("current");
+              } else {
+                link.classList.remove("current");    
+              }
+            } else {
+              link.classList.add("current");
+            }
+          } else {
+            link.classList.remove("current");
+          }
+        });
+      });
+
+    </script>
+  </body>
+</html>

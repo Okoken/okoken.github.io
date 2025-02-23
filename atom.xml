@@ -1,0 +1,463 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <id>https://okoken.github.io/</id>
+    <title>Okoken&apos;s notes</title>
+    <updated>2025-02-23T12:15:17.332Z</updated>
+    <generator>https://github.com/jpmonette/feed</generator>
+    <link rel="alternate" href="https://okoken.github.io/"/>
+    <link rel="self" href="https://okoken.github.io/atom.xml"/>
+    <subtitle>This is the first time I use Gitalk. If you could not leave a comment, please let me know by directly submitting an issue.
+https://github.com/Okoken/okoken.github.io/issues</subtitle>
+    <logo>https://okoken.github.io/images/avatar.png</logo>
+    <icon>https://okoken.github.io/favicon.ico</icon>
+    <rights>All rights reserved 2025, Okoken&apos;s notes</rights>
+    <entry>
+        <title type="html"><![CDATA[Play Steamdeck vertically]]></title>
+        <id>https://okoken.github.io/post/play-steamdeck-vertically/</id>
+        <link href="https://okoken.github.io/post/play-steamdeck-vertically/">
+        </link>
+        <updated>2024-05-11T17:05:48.000Z</updated>
+        <summary type="html"><![CDATA[<p>Here is the method I play the Steam Deck vertically with JoyCons, mostly for emulators but also mostly work for other games.<br>
+<img src="https://okoken.github.io//post-images/1715433415119.jpg" alt="" loading="lazy"></p>
+<h1 id="1-hw-part">1. HW part</h1>
+<p><strong>Updates on 2/23/2025: also created a 3D printable grip model. Refer to below link.<br>
+https://makerworld.com/zh/models/1140868#profileId-1143225</strong></p>
+]]></summary>
+        <content type="html"><![CDATA[<p>Here is the method I play the Steam Deck vertically with JoyCons, mostly for emulators but also mostly work for other games.<br>
+<img src="https://okoken.github.io//post-images/1715433415119.jpg" alt="" loading="lazy"></p>
+<h1 id="1-hw-part">1. HW part</h1>
+<p><strong>Updates on 2/23/2025: also created a 3D printable grip model. Refer to below link.<br>
+https://makerworld.com/zh/models/1140868#profileId-1143225</strong></p>
+<!-- more -->
+<hr>
+<p>The key accessary is the 3D printed part for Joycon attachment, which I bought it from Taoabo (China ver. Aliexpress).<br>
+https://item.taobao.com/item.htm?abbucket=14&amp;id=706851826742&amp;ns=1&amp;priceTId=214780e317154338077877668e1449&amp;spm=a21n57.1.item.9.4635523cCWRzUt<br>
+<img src="https://okoken.github.io//post-images/1715433925667.png" alt="" loading="lazy"></p>
+<p>We also need a stand to &quot;hook&quot; the Joycons finally to the Steamdeck, which I happened to have one disparted from the &quot;Back Cover Protective Case&quot; I bough previous (what I need was just the cover lol).<br>
+<img src="https://okoken.github.io//post-images/1715434112761.png" alt="" loading="lazy"></p>
+<p>At the end the combined accessory together with the Joycons looks like this.<br>
+<img src="https://okoken.github.io//post-images/1715434293569.jpg" alt="" loading="lazy"></p>
+<h1 id="2-sw-part">2. SW part</h1>
+<p>Well once we complete the HW part it is really OK to go, but just very inconvenient due to several reasons:</p>
+<ul>
+<li>Joycons need to be paired after every restart (Linux or Joycon limitation?)</li>
+<li>Steamdeck controllers buttons may be unexpectedly pushed, affecting the game play</li>
+<li>Too many steps to rotate the screen</li>
+<li>Not all the game can start properly with vertical resolution</li>
+</ul>
+<p>To make our live easier, surely we can make some bash script to automate the jobs, and below are some key commands to be used.<br>
+Surely first go inside Desktop Mode.</p>
+<p><em><strong>Joycon Autoconnection</strong></em></p>
+<pre><code>#!/bin/bash
+
+# Replace below MAC with those of your Joycon L and Joycon R !!
+bluetoothctl -- remove DC:68:EB:54:41:D6
+bluetoothctl -- remove DC:68:EB:54:37:10
+
+while true
+do
+    bluetoothctl --timeout 3 scan on
+
+    # Replace below MAC with those of your Joycon L!!
+    bluetoothctl -- connect DC:68:EB:54:41:D6
+    retValL=$?
+
+    # Replace below MAC with those of your Joycon R !!
+    bluetoothctl -- connect DC:68:EB:54:37:10
+    retValR=$?
+    if [ $retValL -ne 0 ] || [ $retValR -ne 0 ]; then
+        echo &quot;Error&quot;
+    else
+        break
+    fi
+done
+</code></pre>
+<p><em><strong>Steamdeck Controller Disable</strong></em></p>
+<pre><code>#!/bin/bash
+# Replace below 12345678 with your user password !!
+echo 12345678 | sudo -S sh -c &quot;echo '3-3:1.0' &gt; /sys/bus/usb/drivers/usbhid/unbind&quot;
+echo 12345678 | sudo -S sh -c &quot;echo '3-3:1.1' &gt; /sys/bus/usb/drivers/usbhid/unbind&quot;
+echo 12345678 | sudo -S sh -c &quot;echo '3-3:1.2' &gt; /sys/bus/usb/drivers/usbhid/unbind&quot;
+</code></pre>
+<p><em><strong>Steamdeck Controller Enable</strong></em></p>
+<pre><code>#!/bin/bash
+# Replace below 12345678 with your user password !!
+echo 12345678 | sudo -S sh -c &quot;echo '3-3:1.0' &gt; /sys/bus/usb/drivers/usbhid/bind&quot;
+echo 12345678 | sudo -S sh -c &quot;echo '3-3:1.1' &gt; /sys/bus/usb/drivers/usbhid/bind&quot;
+echo 12345678 | sudo -S sh -c &quot;echo '3-3:1.2' &gt; /sys/bus/usb/drivers/usbhid/bind&quot;
+</code></pre>
+<p><em><strong>Steamdeck Screen Vertical</strong></em></p>
+<pre><code>#!/bin/bash
+xrandr --output eDP --mode 800x1280 --pos 0x0 --rotate inverted
+# Steamdeck Screen Horizontal
+#!/bin/bash
+xrandr --output eDP --mode 800x1280 --pos 0x0 --rotate right
+</code></pre>
+<p><em><strong>Run game properly in Vertical mode</strong></em><br>
+For emulators this step can be skipped, but for Windows games, many of them cannot be started in vertical resolution.<br>
+Tested Gamescope but it is not always working, so turn around to use KWin/Wayland.</p>
+<pre><code>#!/bin/bash
+export $(dbus-launch)
+kwin_wayland --xwayland --width 1280 --height 800 --scale 0.625 &amp;
+</code></pre>
+<p>Then we can restart Steam in Big picture mode with below script.</p>
+<pre><code>#!/bin/bash
+killall steam
+sleep 5
+ps cax | grep steam
+retval=$?t
+
+while 1
+do
+    if [ $retval -eq 0 ]
+    then
+        echo &quot;Steam still alive.&quot;
+    else
+        break
+    fi
+done
+
+sleep 5
+DISPLAY=:1 steam -bigpicture
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[To enable WIFI hotspot in Steamdeck for Steamlink, etc.]]></title>
+        <id>https://okoken.github.io/post/to-enable-wifi-hotspot-in-steamdeck-for-steamlink-etc/</id>
+        <link href="https://okoken.github.io/post/to-enable-wifi-hotspot-in-steamdeck-for-steamlink-etc/">
+        </link>
+        <updated>2023-06-24T08:26:46.000Z</updated>
+        <content type="html"><![CDATA[<p>The &quot;hotspot&quot; button in Steamdeck desktop mode does not work.</p>
+<p>Inspired by below Reddit discussion, confirmed the capability to enable WIFI hotspot in Steamdeck.<br>
+<a href="https://www.reddit.com/r/SteamDeck/comments/vd6xkg/comment/jemll1l/?utm_source=share&amp;utm_medium=web2x&amp;context=3">https://www.reddit.com/r/SteamDeck/comments/vd6xkg/comment/jemll1l/?utm_source=share&amp;utm_medium=web2x&amp;context=3</a></p>
+<p>First tried the method mentioned in the above site. It worked, even without installking dkms driver.<br>
+But the same problem happened, that the speed cannot be faster than 5Mbps.</p>
+<p>After some investigation noticed that the Network Manager (nmcli) cannot create hotspot with ieee80211n leading to a low speed, and the problem can be solve by using hostapd instead.</p>
+<hr>
+<Conclusion>
+Following Archwiki, create_ap is the easiest way to create hotspot with hostapd.
+<ol>
+<li>
+<p>Install create_ap package via yay.<br>
+<a href="https://aur.archlinux.org/packages/create_ap">https://aur.archlinux.org/packages/create_ap</a><br>
+The github instruction suggested pacman for installation. Maybe just the same but did not try.</p>
+</li>
+<li>
+<p>To remove the file before the first execution. Else error will happen.<br>
+/tmp/create_ap.all.lock</p>
+</li>
+<li>
+<p>Follow the example in the github site to create hotspot.<br>
+<a href="https://github.com/oblique/create_ap">https://github.com/oblique/create_ap</a><br>
+E.g.,<br>
+create_ap --ieee80211n --ht_capab '[HT40+]' -n wlan0 MyAccessPoint MyPassPhrase</p>
+</li>
+</ol>
+<p>Hints:</p>
+<ul>
+<li>You may need to run 'rfkill unblock wlan' before the create_ap command.</li>
+<li>If you force the create_ap to stop and cannot connect to WIFI anymore, remove the row 'unmanaged-devices=interface-name:wlan0' from the /etc/NetworkManager/NetworkManager.conf</li>
+</ul>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Windows 10/11 physical & virtual dual boot on Steamdeck (Virtualbox)]]></title>
+        <id>https://okoken.github.io/post/windows-1011-physical-and-virtual-dual-boot-on-steamdeck-virtualbox/</id>
+        <link href="https://okoken.github.io/post/windows-1011-physical-and-virtual-dual-boot-on-steamdeck-virtualbox/">
+        </link>
+        <updated>2023-05-14T23:14:42.000Z</updated>
+        <content type="html"><![CDATA[<p>Recently upgraded the SSD to 512GB and remade the SteamOS. With such clean system, started to re-investigate the Windows physical &amp; virtual dual boot to get rid of the cons of the KVM method (Link: https://okoken.github.io/post/windows-1011-physical-and-virtual-dual-boot-on-steamdeck/).</p>
+<p>To simply conclude, this method meets all my needs and already used in my daily life.</p>
+<p><strong>🔨&lt;2nd trial with Virtualbox&gt;</strong><br>
+Inspiring by @Lampa183, found the way to install Virtualbox in SteamOS easily.<br>
+https://www.reddit.com/r/SteamDeck/comments/y4n7k6/macos_catalina_on_steam_deck_steamos_virtualbox/</p>
+<p>💡 Pros:<br>
+- no USB SD card reader required anymore<br>
+- out-of-the-box features provided by Virtualbox, e.g. shared folder<br>
+<strong>💡 Cons:</strong><br>
+- need to run script to reinstall it after every SteamOS update</p>
+<p><strong>💡 Requirements:</strong></p>
+<ul>
+<li>SD card</li>
+</ul>
+<p><strong>💡 Major steps:</strong></p>
+<ol>
+<li>
+<p>Prepare Windows-To-Go in VHD format. I am using MBR option, but believe GPT options works the same (and even better).</p>
+<blockquote>
+<p>hints: Rufus is not supporting WTG in VHD. Here is a Chinese tool with English support.<br>
+Home site:  https://bbs.luobotou.org/thread-761-1-1.html<br>
+Download link: https://dl.luobotou.org/wtga5610.zip</p>
+</blockquote>
+</li>
+<li>
+<p>To install Virtualbox <em>(will not survice after SteamOS update)</em><br>
+2a. Install packages [linux-neptune-headers virtualbox-host-dkms virtualbox] via pacman.</p>
+<blockquote>
+<p>hints: Instructions for Steamdeck pacman can be easily found if you search. Just be careful to use &quot;pacman <strong>-Sy</strong> [package1 package2 ...]&quot; as per @Philipp Richter, Steam Deck Tricks (https://gitlab.com/popsulfr/steam-deck-tricks).<br>
+2b. Configure Virtualbox following Archlinux wiki (https://wiki.archlinux.org/title/VirtualBox), and reboot.<br>
+hints: minimum commands as below.</p>
+</blockquote>
+<pre><code>modprobe vboxdrv
+gpasswd -a deck vboxusers
+</code></pre>
+</li>
+<li>
+<p>To make the VHD bootable, inspired by @pbatard / uefi-ntfs (https://github.com/pbatard/uefi-ntfs)<br>
+3a. To mount VHD in another Windows. You can choose to mount in another PC or in a another VM.<br>
+3b. Create a new partition at the end of the VHD with any disk manager e.g. DiskGenius. Format and size should be the same as the EFI partition in the SD card.<br>
+3c. Copy all the contents from the SD card EFI partition to the new VHD partition you just created.<br>
+3d. BOOTICE to load EFI/Microsoft/Boot/BCD in the new partition, and change the boot path from VHD to the 1st partion in the VHD.<br>
+<em>I don't have screenshots, but this step is tricky so borrowed some screenshot from somewhere else. Only below parts in the red circles need to be changed.</em><br>
+<Before><br>
+<img src="https://okoken.github.io//post-images/1684058151770.jpg" alt="" loading="lazy"><br>
+<After><br>
+<img src="https://okoken.github.io//post-images/1684058165501.png" alt="" loading="lazy"></p>
+</li>
+<li>
+<p>Create new VM in Virtualbox with the VHD, and with &quot;Enable EFI&quot; option checked in the Settings-&gt;System.</p>
+<blockquote>
+<p>Now the Windows should be bootable via Virtualbox and physically.<br>
+<em>Remember to backup your VHD regullarly, as you know some SD has bad performance and can easily corrupt.</em></p>
+</blockquote>
+</li>
+</ol>
+<p><strong>💡 Optional steps and tips</strong></p>
+<ol>
+<li>For easy backup, mostly we keep the VHD as small as possible, e.g. around 64GB with dynamic size. Therefore when we boot the Windows physically, typically we will have the VHD mount as C:\ and the real SD card as D:.<br>
+In this case it is a good idea to always install applications in D:, and to reallocate some folders (Desktop, Downloads, Documents, etc.) to the D:. There are many instrutions and below is one:
+<blockquote>
+<p>https://www.partitionwizard.com/clone-disk/win10-move-user-folder-to-another-drive.html</p>
+</blockquote>
+</li>
+</ol>
+<p>But it is quite a headache to let the Windows still access the D:\ when boot via Virtualbox. Below is the method.<br>
+1a. Add the whole SD card as &quot;Shared Folder&quot; in VM settings, with Full access, Auto Mount, and assign a Mount Point e.g. Z:\.<br>
+1b. Create a new virtual hard disk for Windows VM, and boot up the Windows VM to create partition on it. Assign it as D:\.<br>
+1c. Use mkdir command to create hard link from Z:\ to D:\. <em>Without this hardlink you will not be able to run .exe requiring Admin permission. Inspired by @Casey Dwayne,</em></p>
+<blockquote>
+<p>https://forums.virtualbox.org/viewtopic.php?t=80854#:~:text=mklink%20%2Fd%20TempDir,To%5CDesired%20Folder%22</p>
+</blockquote>
+<ol start="2">
+<li>
+<p>!!! The mouse driver in the Virtualbox Guest Additions will crash Windows. If you use Virtualbox Guest Additions, follow below steps to uninstall the mouse driver inside.<br>
+2a. Use command line to direct the path to the Virtualbox Guest Additions CD. Run</p>
+<pre><code> .\VBoxWindowsAdditions.exe /extract /D=path_to_some_where
+</code></pre>
+<p>2b. Direct to the <em>path_to_some_where</em> you extracted the files. Run</p>
+<pre><code> .\VBoxDrvInst.exe driver uninstall .\VBoxMouse.inf
+</code></pre>
+</li>
+<li>
+<p>To automount the SD card NTFS partition at SteamOS bootup. Below are the instructions I used @Chinballs Gaming.</p>
+<blockquote>
+<p>https://www.youtube.com/watch?v=Z6dhdlqtPS4<br>
+https://www.youtube.com/watch?v=elusccCzvOc (in case you made anything wrong and cannot boot your SteamOS)</p>
+</blockquote>
+</li>
+<li>
+<p>For USB3.0 the Virtualbox Extension Pack is required. Below are the commands to install it easily. <em>(will not survice after SteamOS update)</em></p>
+<pre><code>echo &quot;Downloading Virtualbox Extension Pack&quot;
+curl https://download.virtualbox.org/virtualbox/$(vboxmanage -v | cut -dr -f1)/Oracle_VM_VirtualBox_Extension_Pack-$(vboxmanage -v | cut -dr -f1).vbox-extpack -o Oracle_VM_VirtualBox_Extension_Pack.vbox-extpack
+
+echo &quot;Installing Virtualbox Extension Pack&quot;
+echo y | VBoxManage extpack install --replace ./Oracle_VM_VirtualBox_Extension_Pack.vbox-extpack
+</code></pre>
+</li>
+<li>
+<p>For all the steps which will not survive after SteamOS update, good to put every commands in shell bash so that you can run them easily after every SteamOS. One example by @muzzol/SD_packages-pacman.sh:</p>
+<blockquote>
+<p>https://gist.github.com/muzzol/9f559c92a7f1132fcd65b211a86759b2</p>
+</blockquote>
+</li>
+<li>
+<p>Timezone is another issue between SteamOS and Windows. Here is a method to fix it from @HoodedHorse.</p>
+<blockquote>
+<p>https://www.reddit.com/r/SteamDeck/comments/uxnukk/problem_with_dualbooting_windows_and_time_zones/#:~:text=open%20up%20a,t%20REG_DWORD%20%2Ff</p>
+</blockquote>
+</li>
+<li>
+<p>It is annoying that the EFI partitions are visible in Windows or SteamOS. DISKPART command under Windows can remove the volumn lable to avoid showing it in Windows, and &quot;set id=EF&quot; can avoid showing it in SteamOS, inspired by @Ahze85283:</p>
+<blockquote>
+<p>https://superuser.com/questions/459434/how-to-make-a-hidden-partition-visible</p>
+</blockquote>
+</li>
+<li>
+<p>It would be great if I can use my bluetooth mouse / keyboard in both the SteamOS and the physical Windows without reconnection. @Mario Olivio Flores provided the method with <em>psexec</em>.</p>
+<blockquote>
+<p>https://unix.stackexchange.com/questions/255509/bluetooth-pairing-on-dual-boot-of-windows-linux-mint-ubuntu-stop-having-to-p#:~:text=You%20need%20psexec,show%20this%20values</p>
+</blockquote>
+</li>
+<li>
+<p>In case you want better network adapter performance in the Windows VM e.g. for NAS access, it would be worthy to install the virtIO driver for the virtio-net (Virtualbox VM -&gt; Settings -&gt; Network -&gt; Adapter1 -&gt; Advanced -&gt; Adapter Type). Driver is here:</p>
+<blockquote>
+<p>https://docs.fedoraproject.org/en-US/quick-docs/creating-windows-virtual-machines-using-virtio-drivers/</p>
+</blockquote>
+</li>
+</ol>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[To use Logicool K480 for Steamdeck]]></title>
+        <id>https://okoken.github.io/post/to-use-logicool-k480-for-steamdeck/</id>
+        <link href="https://okoken.github.io/post/to-use-logicool-k480-for-steamdeck/">
+        </link>
+        <updated>2023-05-14T17:29:37.000Z</updated>
+        <content type="html"><![CDATA[<p>The Logicool K480 as a bluetooth keyboard surely can be direclty used for Steamdeck.<br>
+But as a well known issue, there is no official driver provided for Linux platform, therefore F1~F12 work as Multimedia Keys in default instead of Function Keys.</p>
+<p><strong>Not acceptable at all.</strong></p>
+<p>Noticed that an AUR package <em>k480-function-keys-conf-git</em> is provided as a solution, but cannot be used directly due to 2 issues:<br>
+💣 one of the checksum inside is wrong<br>
+💣 compile will fail because the <em>linux-neptune-headers</em> used by SteamOS has a special structure</p>
+<p>Below is the solution to solve the issues and use it.</p>
+<ol>
+<li>
+<p>To download the snapshot directly and extract it to your local, e.g., ./k480-function-keys-conf-git.</p>
+<blockquote>
+<p>https://aur.archlinux.org/cgit/aur.git/snapshot/k480-function-keys-conf-git.tar.gz</p>
+</blockquote>
+</li>
+<li>
+<p>To replace the checksum in both <em>.SRCINFO</em> and <em>PKGBUILD</em></p>
+<blockquote>
+<p>Before: 2caee64458f1c921845f22aeae1b034eebfe3b39f9fe9b317fe0bbae500a535c<br>
+After: 356e31ae1a2d835e020f8c54ab28eae0d4265869cb5f94c6503d02dd1f6eae32</p>
+</blockquote>
+</li>
+<li>
+<p>To modify below part in the <em>PKGBUILD</em>.</p>
+<blockquote>
+<p>Before:</p>
+</blockquote>
+<p>build() {<br>
+cd &quot;<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>s</mi><mi>r</mi><mi>c</mi><mi>d</mi><mi>i</mi><mi>r</mi><mi mathvariant="normal">/</mi></mrow><annotation encoding="application/x-tex">srcdir/</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault">s</span><span class="mord mathdefault" style="margin-right:0.02778em;">r</span><span class="mord mathdefault">c</span><span class="mord mathdefault">d</span><span class="mord mathdefault">i</span><span class="mord mathdefault" style="margin-right:0.02778em;">r</span><span class="mord">/</span></span></span></span>_pkgname&quot;<br>
+./build.sh<br>
+}</p>
+<blockquote>
+<p>After:</p>
+</blockquote>
+<p>build() {<br>
+cd &quot;<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>s</mi><mi>r</mi><mi>c</mi><mi>d</mi><mi>i</mi><mi>r</mi><mi mathvariant="normal">/</mi></mrow><annotation encoding="application/x-tex">srcdir/</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault">s</span><span class="mord mathdefault" style="margin-right:0.02778em;">r</span><span class="mord mathdefault">c</span><span class="mord mathdefault">d</span><span class="mord mathdefault">i</span><span class="mord mathdefault" style="margin-right:0.02778em;">r</span><span class="mord">/</span></span></span></span>_pkgname&quot;<br>
+sed -i '/gcc -o $file <span class='katex-error' title='ParseError: KaTeX parse error: Undefined control sequence: \gcc at position 9: file.c/c\̲g̲c̲c̲ ̲-I /usr/lib/mod…'>file.c/c\gcc -I /usr/lib/modules/</span>(uname -r)/build/include/uapi -I /usr/lib/modules/<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo>(</mo><mi>u</mi><mi>n</mi><mi>a</mi><mi>m</mi><mi>e</mi><mo>−</mo><mi>r</mi><mo>)</mo><mi mathvariant="normal">/</mi><mi>b</mi><mi>u</mi><mi>i</mi><mi>l</mi><mi>d</mi><mi mathvariant="normal">/</mi><mi>a</mi><mi>r</mi><mi>c</mi><mi>h</mi><mi mathvariant="normal">/</mi><mi>x</mi><mn>86</mn><mi mathvariant="normal">/</mi><mi>i</mi><mi>n</mi><mi>c</mi><mi>l</mi><mi>u</mi><mi>d</mi><mi>e</mi><mi mathvariant="normal">/</mi><mi>g</mi><mi>e</mi><mi>n</mi><mi>e</mi><mi>r</mi><mi>a</mi><mi>t</mi><mi>e</mi><mi>d</mi><mi mathvariant="normal">/</mi><mi>u</mi><mi>a</mi><mi>p</mi><mi>i</mi><mo>−</mo><mi>I</mi><mi mathvariant="normal">/</mi><mi>u</mi><mi>s</mi><mi>r</mi><mi mathvariant="normal">/</mi><mi>l</mi><mi>i</mi><mi>b</mi><mi mathvariant="normal">/</mi><mi>m</mi><mi>o</mi><mi>d</mi><mi>u</mi><mi>l</mi><mi>e</mi><mi>s</mi><mi mathvariant="normal">/</mi></mrow><annotation encoding="application/x-tex">(uname -r)/build/arch/x86/include/generated/uapi -I /usr/lib/modules/</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord mathdefault">u</span><span class="mord mathdefault">n</span><span class="mord mathdefault">a</span><span class="mord mathdefault">m</span><span class="mord mathdefault">e</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">r</span><span class="mclose">)</span><span class="mord">/</span><span class="mord mathdefault">b</span><span class="mord mathdefault">u</span><span class="mord mathdefault">i</span><span class="mord mathdefault" style="margin-right:0.01968em;">l</span><span class="mord mathdefault">d</span><span class="mord">/</span><span class="mord mathdefault">a</span><span class="mord mathdefault" style="margin-right:0.02778em;">r</span><span class="mord mathdefault">c</span><span class="mord mathdefault">h</span><span class="mord">/</span><span class="mord mathdefault">x</span><span class="mord">8</span><span class="mord">6</span><span class="mord">/</span><span class="mord mathdefault">i</span><span class="mord mathdefault">n</span><span class="mord mathdefault">c</span><span class="mord mathdefault" style="margin-right:0.01968em;">l</span><span class="mord mathdefault">u</span><span class="mord mathdefault">d</span><span class="mord mathdefault">e</span><span class="mord">/</span><span class="mord mathdefault" style="margin-right:0.03588em;">g</span><span class="mord mathdefault">e</span><span class="mord mathdefault">n</span><span class="mord mathdefault">e</span><span class="mord mathdefault" style="margin-right:0.02778em;">r</span><span class="mord mathdefault">a</span><span class="mord mathdefault">t</span><span class="mord mathdefault">e</span><span class="mord mathdefault">d</span><span class="mord">/</span><span class="mord mathdefault">u</span><span class="mord mathdefault">a</span><span class="mord mathdefault">p</span><span class="mord mathdefault">i</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.07847em;">I</span><span class="mord">/</span><span class="mord mathdefault">u</span><span class="mord mathdefault">s</span><span class="mord mathdefault" style="margin-right:0.02778em;">r</span><span class="mord">/</span><span class="mord mathdefault" style="margin-right:0.01968em;">l</span><span class="mord mathdefault">i</span><span class="mord mathdefault">b</span><span class="mord">/</span><span class="mord mathdefault">m</span><span class="mord mathdefault">o</span><span class="mord mathdefault">d</span><span class="mord mathdefault">u</span><span class="mord mathdefault" style="margin-right:0.01968em;">l</span><span class="mord mathdefault">e</span><span class="mord mathdefault">s</span><span class="mord">/</span></span></span></span>(uname -r)/build/arch/x86/include/uapi -I /usr/lib/modules/$(uname -r)/build/include -o $file $file.c' ./build.sh<br>
+./build.sh<br>
+}</p>
+</li>
+<li>
+<p>Use pacman to install packages [linux-neptune-headers glibc base-devel], then run below command in ./k480-function-keys-conf-git (the same folder <em>PKGBUILD</em> inside).</p>
+<blockquote>
+<p>makepkg -sci --noconfirm</p>
+</blockquote>
+</li>
+<li>
+<p>Reboot your system and F1~F12 should work as Function Keys in default now.</p>
+</li>
+</ol>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Windows 10/11 physical & virtual dual boot on Steamdeck (KVM)]]></title>
+        <id>https://okoken.github.io/post/windows-1011-physical-and-virtual-dual-boot-on-steamdeck/</id>
+        <link href="https://okoken.github.io/post/windows-1011-physical-and-virtual-dual-boot-on-steamdeck/">
+        </link>
+        <updated>2023-05-14T15:30:16.000Z</updated>
+        <content type="html"><![CDATA[<p>There are many instrusctions to tell how to install Windows physically in the Steamdeck, which is very nice in most of the cases, but sometimes I just want to run a small task in the Windows and in such a scene virtual machine would be much more convenient.</p>
+<p>So here is the MEMO of the 1st trial. But to say, personally the 2nd trial Virtualbox solution is better (Link: https://okoken.github.io/post/windows-1011-physical-and-virtual-dual-boot-on-steamdeck-virtualbox/).</p>
+<p><strong>🔨&lt;1st trial with KVM&gt;</strong><br>
+Tried to install Virtualbox following Archlinux wiki but failed to compile the kernal driver. To avoid ruin my SteamOS, turn around to try KVM which is originally installed.</p>
+<p><strong>💡 Pros:</strong><br>
+- survives after every SteamOS update, thanks for Distrobox<br>
+- better VM disk performance (if good USB SD card reader is used)<br>
+<strong>💡 Cons:</strong><br>
+- relies on USB passthrough, therefore SD card needs to be accessed via USB SD card reader when boot as VM<br>
+- complicated share folder solution when boot as VM</p>
+<p><strong>💡 Steps:</strong><br>
+This method is originally posted in the Steam community. Since I am not using this method anymore, no screenshot is left. 😖<br>
+Below is the copy.</p>
+<blockquote>
+<p>https://steamcommunity.com/app/1675200/discussions/0/3761104049348898945/</p>
+</blockquote>
+<p><strong>💡 Pre-requisite:</strong><br>
+💡 Recommended to build a new clean system for it, in case BSoD happened. If you want to go ahead with your existing system, do backup before starting.<br>
+💡 WTG recommended to be installed with MBR partition scheme (UEFI + BIOS). GPT may work but did not try.<br>
+💡 Use USB SD card reader but not the internal SD card reader for the Windows, unless you could find a way for PCI passthrough.</p>
+<ol>
+<li>To install distrobox in the HOME path following below site. Thanks to @Liam Dawe.</li>
+</ol>
+<blockquote>
+<p>https://www.gamingonlinux.com/2022/09/distrobox-can-open-up-the-steam-deck-to-a-whole-new-world/</p>
+</blockquote>
+<ol start="2">
+<li>To create container Alpine:latest, and follow below site &quot;Installation&quot; and &quot;Management&quot; and &quot;Guest lifecycle management&quot; to install KVM, virt-manager, etc.</li>
+</ol>
+<blockquote>
+<p>https://wiki.alpinelinux.org/wiki/KVM<br>
+<em>I tried a lot of Linux versions but only Alpine Linux works</em> 😃</p>
+</blockquote>
+<ol start="3">
+<li>
+<p>Run virt-manager in the container, connect to the QEMU/KVM User session, and create new virtual machine with USB passthrough for the SD card with Windows inside, following below site.<br>
+https://www.linux-kvm.org/page/USB_Host_Device_Assigned_to_Guest</p>
+</li>
+<li>
+<p>Start the virtual machine to boot Windows, and enjoy!</p>
+</li>
+</ol>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[To use 3DS as controller for Steamdeck]]></title>
+        <id>https://okoken.github.io/post/to-use-3ds-as-controller-for-steamdeck/</id>
+        <link href="https://okoken.github.io/post/to-use-3ds-as-controller-for-steamdeck/">
+        </link>
+        <updated>2023-05-14T14:01:27.000Z</updated>
+        <content type="html"><![CDATA[<p>Need a controller for multiplay games, but don't want to buy a new controller, therefore try to re-use my New 3DS as controller for Steamdeck.</p>
+<p>Thougt it should be easy to just follow the guidance in @CTurt / 3DSController (https://github.com/CTurt/3DSController), but found it has issues and not working anymore.<br>
+Fortunately @slenered fixed the issue in the forked repository, and below are the full steps to use it.</p>
+<ol>
+<li>
+<p>To install Yay. See https://okoken.github.io/post/to-install-yay-an-aur-helper-in-steamdeck/.</p>
+</li>
+<li>
+<p>To install python-uinput with Yay. Reference:<br>
+yay -Sy --noconfirm python-uinput</p>
+</li>
+<li>
+<p>Download the 3DSController.cia from @slenered / 3DSController, release 0.7.</p>
+<blockquote>
+<p>https://github.com/slenered/3DSController/releases/tag/0.7</p>
+</blockquote>
+</li>
+<li>
+<p>Other steps just follow the original @CTurt / 3DSController (https://github.com/CTurt/3DSController)</p>
+<blockquote>
+<p>https://github.com/CTurt/3DSController#setup-and-usage-linux</p>
+</blockquote>
+</li>
+<li>
+<p>Creat shell script for the neccessary commands and add it to the Steam Library for Game Mode. Instructions can easily be found and skipped here 😉</p>
+</li>
+</ol>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[To install Yay (An AUR Helper) in Steamdeck]]></title>
+        <id>https://okoken.github.io/post/to-install-yay-an-aur-helper-in-steamdeck/</id>
+        <link href="https://okoken.github.io/post/to-install-yay-an-aur-helper-in-steamdeck/">
+        </link>
+        <updated>2023-05-14T13:08:43.000Z</updated>
+        <content type="html"><![CDATA[<p>Faced some difficulties to install Yay for some AUR packages, therefore leave a memo here.</p>
+<p>@Jguer / yay, https://github.com/Jguer/yay<br>
+In short, the method to complile Yay from source would fail.<br>
+Instead the <strong>Binary</strong> method shall be followed.</p>
+<pre><code>## install yay
+sudo pacman -Sy --noconfirm base-devel git
+git clone https://aur.archlinux.org/yay-bin.git
+cd yay-bin
+makepkg -si --noconfirm
+cd ..
+rm -rf yay-bin
+</code></pre>
+]]></content>
+    </entry>
+</feed>
